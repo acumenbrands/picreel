@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
+
+    <script src="../tmp/picreel.js"></script>
+
+  </head>
+  <body>
+
+    <div id="qunit-fixture"></div>
+
+    <!-- Test layout -->
+    <div data-em="modal-container" class="container">
+      <img data-em="logo" src="">
+      <div data-em="text-line-1">Special offer to you</div>
+      <div data-em="text-line-2">Enter email and you $10 off, RIGHT NOW!</div>
+      <input name="email" placeholder="Much email address" type="email" required="required">
+      <button data-em="button" type="submit" class="submit btn-bg-color" id="submit-button">ME 15% OFF NOW!</button>
+      <div data-em="modal-close-link" class="close close-link" id="close-link">No, thanks. I rather no this deal.</div>
+    </div>
+
+
+    <script src="../node_modules/browser-jquery/jquery.js"></script>
+    <script src="../node_modules/qunitjs/qunit/qunit.js"></script>
+    <script src="./test_helper.js"></script>
+
+    <script>
+      var dataLayer = {
+        push : function() {}
+      };
+    </script>
+
+  </body>
+</html>
