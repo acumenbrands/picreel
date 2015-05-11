@@ -22,7 +22,6 @@
       this.action         = this.action          || "/";
       this.carrier        = null;
 
-      this.unbindDefaultClickEvents();
       this.bindNewClickEvents();
     }
 
@@ -57,10 +56,9 @@
     };
 
     APLSubscriber.prototype.handleButtonClick = function(e) {
-      e.preventDefault();
-      $(self).trigger('onBeforeSubmit');
       this.removeErrorStatus();
       this.applyLoadingStatus();
+
       var email = this.$(this.emailSelector).val();
 
       if(this.emailIsValid(email)) {
@@ -121,14 +119,10 @@
       this.carrier = this.$.ajax(carrierOptions);
     };
 
-    APLSubscriber.prototype.unbindDefaultClickEvents = function() {
-      this.$(this.submitSelector).off('click');
-    };
-
     APLSubscriber.prototype.bindNewClickEvents = function() {
       var _APL = this;
 
-      this.$(_APL.submitSelector).on('click', function(e){
+      this.$(this.submitSelector).on('onBeforeSubmit', function(e){
         _APL.handleButtonClick(e);
       });
     };

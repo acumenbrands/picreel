@@ -35,29 +35,27 @@ QUnit.test("APL Subscriber", function(assert) {
   handleButtonClickSpy.reset();
   applyLoadingStatusSpy.reset();
   $(subject.emailSelector).val(validEmail);
-  $(subject.submitSelector).trigger("click");
+  $(subject.submitSelector).trigger("onBeforeSubmit");
   assert.ok(handleButtonClickSpy.called, "When button is clicked, subscriber should submit to custom handler");
   assert.ok(applyLoadingStatusSpy.called, "Indicates when loading");
 
   submitSpy.reset();
   applyErrorStatusSpy.reset();
   $(subject.emailSelector).val(invalidEmail);
-  $(subject.submitSelector).trigger("click");
+  $(subject.submitSelector).trigger("onBeforeSubmit");
   assert.notOk(submitSpy.called, "Won't submit an invalid Email");
   assert.ok(applyErrorStatusSpy.called, "Indicates an error has occured");
 
   submitSpy.reset();
   removeErrorStatusSpy.reset();
   $(subject.emailSelector).val(validEmail);
-  $(subject.submitSelector).trigger("click");
+  $(subject.submitSelector).trigger("onBeforeSubmit");
   assert.ok(submitSpy.called, "Will submit a valid Email");
   assert.ok(removeErrorStatusSpy.called, "Removes error indicators");
 
   carrierSpy.reset();
   $(subject.emailSelector).val(validEmail);
-  $(subject.submitSelector).trigger("click");
+  $(subject.submitSelector).trigger("onBeforeSubmit");
   assert.deepEqual(subject.formToCarrierParams(), validFormData, "Reads data from the form");
   assert.ok(carrierSpy.called, "Sends AJAX carrier");
-
-  //"Pass picreel extended form data"
 });
