@@ -11,8 +11,9 @@
 
       this.topWindow      = getTopWindow();
       this.$              = this.$               || window.jQuery;
-      this.requestUrl     = this.getRequestUrl() || window.location.href
-      this.submitSelector = this.submitSelector  || '#submit-button';
+      this.requestUrl     = this.getRequestUrl() || window.location.href;
+      this.lists          = this.lists           || [];
+      this.submitSelector = this.submitSelector  || ".submit";
       this.emailSelector  = this.emailSelector   || "input[name='email']";
       this.errorClass     = this.errorClass      || "subscriber-error";
       this.loadingClass   = this.loadingClass    || "subscriber-loading";
@@ -22,11 +23,17 @@
       this.action         = this.action          || "/";
       this.carrier        = null;
 
+      this.buildSubscriberLists();
       this.bindNewClickEvents();
     }
 
+    APLSubscriber.prototype.buildSubscriberLists = function() {
+      if(this.list) {
+        this.lists.push(this.list);
+      }
+    };
+
     APLSubscriber.prototype.applyErrorStatus = function() {
-      this.$(self).trigger('onBeforeSubmit');
     };
 
     APLSubscriber.prototype.applyErrorStatus = function() {
@@ -78,6 +85,13 @@
 
       data['email'] = this.$(this.emailSelector).val();
 
+      if (this.lists.length) {
+        data['lists'] = [];
+        for (var i=0; i<this.lists.length; i++) {
+          data['lists'].push(this.lists[i]);
+        }
+      }
+
       return data;
     };
 
@@ -107,12 +121,12 @@
       var _APL = this;
 
       var carrierOptions = {
-        url:      _APL.action,
-        data:     _APL.formToCarrierParams(),
-        dataType: 'jsonp',
-        complete: function(){ _APL.handleComplete(); },
-        success:  function(){ _APL.handleSuccess(); },
-        error:    function(){ _APL.handleError(); },
+        url:         _APL.action,
+        data:        _APL.formToCarrierParams(),
+        dataType:    'jsonp',
+        complete:    function(){ _APL.handleComplete(); },
+        success:     function(){ _APL.handleSuccess(); },
+        error:       function(){ _APL.handleError(); },
         crossDomain: true
       };
 
@@ -122,7 +136,7 @@
     APLSubscriber.prototype.bindNewClickEvents = function() {
       var _APL = this;
 
-      this.$(this.submitSelector).on('onBeforeSubmit', function(e){
+      this.$(window).on('onBeforeSubmit', function(e){
         _APL.handleButtonClick(e);
       });
     };

@@ -11,10 +11,11 @@ QUnit.test("APL Subscriber", function(assert) {
     submitSelector: "#submit-button",
     emailSelector:  "input[name='email']",
     handler:        "/test/test_handler.js",
+    list:           'SUBSCRIBERS',
     $:              window.jQuery,
-    onerror:        function() { console.log("\nonerror()"); }
+    onerror:        function() {}
   };
-  var subject                = new APLSubscriber();
+  var subject                = new APLSubscriber(params);
   var handleButtonClickSpy   = sinon.spy(subject, "handleButtonClick");
   var submitSpy              = sinon.spy(subject, "submit");
   var carrierSpy             = sinon.spy($, "ajax");
@@ -24,7 +25,7 @@ QUnit.test("APL Subscriber", function(assert) {
   var formToCarrierParamsSpy = sinon.spy(subject, "formToCarrierParams");
   var validEmail             = 'Valid.Email1@address1.co.uk';
   var invalidEmail           = 'invalid.email@address';
-  var validFormData          = {'email': validEmail};
+  var validFormData          = {'email': validEmail, 'lists':['SUBSCRIBERS']};
 
   assert.strictEqual(subject.topWindow, window, "topWindow should be window");
 
@@ -52,6 +53,10 @@ QUnit.test("APL Subscriber", function(assert) {
   $(subject.submitSelector).trigger("onBeforeSubmit");
   assert.ok(submitSpy.called, "Will submit a valid Email");
   assert.ok(removeErrorStatusSpy.called, "Removes error indicators");
+
+  $(subject.emailSelector).val(validEmail);
+  $(subject.submitSelector).trigger("onBeforeSubmit");
+  assert.deepEqual(subject.formToCarrierParams(), validFormData, "If a list is specified, it is submitted");
 
   carrierSpy.reset();
   $(subject.emailSelector).val(validEmail);

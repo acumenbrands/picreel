@@ -32,7 +32,13 @@ This library attempts to follow the SemVer specification. Before deploying, be s
 
 ## Implementation Example
 
-In the Picreel template editor...
+Picreel doesn't do <code>&lt;form&gt;</code>s, but it does do <code>&lt;input&gt;</code>s. Let's say you had
+
+1. an email input <code>&lt;input type="email" name="email"&gt;</code>
+1. a submit input <code>&lt;input type="button" id="submit-button"&gt;</code>
+1. and a desire to submit the form to a custom Sailthru list, "STYLE"
+
+In the editor you would place the following:
 
 ```JavaScript
 <script src="//my-cloudfront-dist-id.cloudfront.net/libs/picreel/0.1.0/picreel.min.js"></script>
@@ -43,7 +49,8 @@ In the Picreel template editor...
       var params = {
         submitSelector: "#submit-button",
         emailSelector:  "input[name='email']",
-        action:         "http://countryoutfitter.com/subscribe/"
+        action:         "https://www.countryoutfitter.com/my_form_handler/",
+        list:           "STYLE"
       };
       window.APLS = new APLSubscriber(params);
     });
@@ -52,6 +59,6 @@ In the Picreel template editor...
 </script>
 ```
 
-_NOTE 1: Pireel's editor does not load jQuery, but we're dependent on jQuery. Therefore, be sure to wrap <code>new APLSubscriber</code> declaration in an <code>if()</code>_
+_NOTE 1: Pireel's editor does not load jQuery, but we're dependent on jQuery. Therefore, be sure to wrap <code>new APLSubscriber</code> declaration in <code>if(window.jQuery)</code>_
 
 _NOTE 2: Most new APLS attributes may be specified when creating a new object. See <code>lib/factories/subscriber.js</code> for what may be created as arguments_
