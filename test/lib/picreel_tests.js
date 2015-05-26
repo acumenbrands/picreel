@@ -7,13 +7,26 @@ QUnit.test("Acumen Picreel Library", function(assert) {
 });
 
 QUnit.test("APL Subscriber", function(assert) {
-  var params = {
+  var validVarsName  = 'hurp';
+  var validListName  = 'SUBSCRIBERS';
+  var validEventName = 'subscribe';
+  var validEmail     = 'Valid.Email1@address1.co.uk';
+  var invalidEmail   = 'invalid.email@address';
+  var params         = {
     submitSelector: "#submit-button",
     emailSelector:  "input[name='email']",
     handler:        "/test/test_handler.js",
-    list:           'SUBSCRIBERS',
+    list:           validListName,
+    vars:           [validVarsName, 'durp'],
+    event:          validEventName,
     $:              window.jQuery,
     onerror:        function() {}
+  };
+  var validFormData = {
+    email: validEmail,
+    lists: [validListName],
+    vars:  [validVarsName, 'durp'],
+    event: validEventName
   };
   var subject                = new APLSubscriber(params);
   var handleButtonClickSpy   = sinon.spy(subject, "handleButtonClick");
@@ -23,13 +36,10 @@ QUnit.test("APL Subscriber", function(assert) {
   var applyLoadingStatusSpy  = sinon.spy(subject, "applyLoadingStatus");
   var removeErrorStatusSpy   = sinon.spy(subject, "removeErrorStatus");
   var formToCarrierParamsSpy = sinon.spy(subject, "formToCarrierParams");
-  var validEmail             = 'Valid.Email1@address1.co.uk';
-  var invalidEmail           = 'invalid.email@address';
-  var validFormData          = {'email': validEmail, 'lists':['SUBSCRIBERS']};
 
   assert.strictEqual(subject.topWindow, window, "topWindow should be window");
 
-  assert.ok(subject.emailIsValid(validEmail), "Recognizes an valid email");
+  assert.ok(subject.emailIsValid(validEmail), "Recognizes a valid email");
 
   assert.notOk(subject.emailIsValid(invalidEmail), "Recognizes an invalid email");
 
@@ -56,7 +66,9 @@ QUnit.test("APL Subscriber", function(assert) {
 
   $(subject.emailSelector).val(validEmail);
   $(subject.submitSelector).trigger("onBeforeSubmit");
-  assert.deepEqual(subject.formToCarrierParams(), validFormData, "If a list is specified, it is submitted");
+  assert.ok((subject.formToCarrierParams().lists.indexOf(validListName) >= 0), "If a list is specified, it is submitted");
+  assert.ok((subject.formToCarrierParams().vars.indexOf(validVarsName) >= 0), "If var values exist, they are submitted");
+  assert.ok((subject.formToCarrierParams().event == validEventName), "If an event name exists, it is submitted");
 
   carrierSpy.reset();
   $(subject.emailSelector).val(validEmail);
