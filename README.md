@@ -41,7 +41,7 @@ Picreel doesn't do <code>&lt;form&gt;</code>s, but it does do <code>&lt;input&gt
 In the editor you would place the following:
 
 ```JavaScript
-<script src="//my-cloudfront-dist-id.cloudfront.net/libs/picreel/0.1.0/picreel.min.js"></script>
+<script src="//my-cloudfront-dist-id.cloudfront.net/libs/picreel/0.4.0/picreel.min.js"></script>
 <script>
   if(window.jQuery){
 
@@ -49,8 +49,56 @@ In the editor you would place the following:
       var params = {
         submitSelector: "#submit-button",
         emailSelector:  "input[name='email']",
-        action:         "https://www.countryoutfitter.com/my_form_handler/",
+        action:         "https://www.mydomain.com/my_form_handler/",
         list:           "STYLE"
+      };
+      window.APLS = new APLSubscriber(params);
+    });
+
+  };
+</script>
+```
+
+### Implementation with vars
+
+Sailthru [Vars](http://getstarted.sailthru.com/new-for-developers-overview/email-and-user-profiles/user/#POST Mode - Optional Parameters - vars 2) may added to templates and will be submitted as event vars and profile varswhen a user subscribes. All vars submitted will be made to equal the value _1_.
+
+Simply add an array of vars to the template editor, as in the following example:
+
+```JavaScript
+<script src="//my-cloudfront-dist-id.cloudfront.net/libs/picreel/0.4.0/picreel.min.js"></script>
+<script>
+  if(window.jQuery){
+
+    jQuery(document).ready(function($) {
+      var params = {
+        action:         "https://www.mydomain.com/my_form_handler/",
+        list:           "SUBSCRIBERS",
+        vars:           ["giveaway", "example"]
+      };
+      window.APLS = new APLSubscriber(params);
+    });
+
+  };
+</script>
+```
+
+### Implementation with a custom event name
+
+Sailthru will accept any event name, but you will have to configure which event names have triggers in Sailthru.
+
+For a custom event name, add it as a string:
+
+```JavaScript
+<script src="//my-cloudfront-dist-id.cloudfront.net/libs/picreel/0.4.0/picreel.min.js"></script>
+<script>
+  if(window.jQuery){
+
+    jQuery(document).ready(function($) {
+      var params = {
+        action:         "https://www.mydomain.com/my_form_handler/",
+        list:           "SUBSCRIBERS",
+        event:          "my_event_name"
       };
       window.APLS = new APLSubscriber(params);
     });
