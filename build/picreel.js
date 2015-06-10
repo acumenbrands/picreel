@@ -1,6 +1,39 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-  (function() {
-    var APLSubscriber = (function() {
+(function() {
+  var Trackers = (function() {
+
+    function Trackers(args) {
+      var args = args || {};
+
+      this.trackers = ('trackers' in args) ? args.trackers : {};
+
+      return this;
+    }
+
+    Trackers.prototype.registerTracker = function (key, ref) {
+      this.trackers[key] = ref;
+    };
+
+    Trackers.prototype.track = function (key, eventOptions) {
+      this.trackers[key].push(eventOptions);
+    };
+
+    var _noop = function() {};
+
+    return Trackers;
+
+  })();
+
+  module.exports = Trackers;
+
+}).call(this);
+
+},{}],2:[function(require,module,exports){
+var Trackers = require('../adapters/trackers');
+
+(function() {
+
+  var APLSubscriber = (function() {
 
     function APLSubscriber(args) {
       for(arg in args) {
@@ -9,24 +42,32 @@
         }
       }
 
-      this.topWindow      = getTopWindow();
-      this.$              = this.$               || window.jQuery;
-      this.requestUrl     = this.getRequestUrl() || window.location.href;
-      this.lists          = this.lists           || [];
-      this.submitSelector = this.submitSelector  || ".submit";
-      this.emailSelector  = this.emailSelector   || "input[name='email']";
-      this.errorClass     = this.errorClass      || "subscriber-error";
-      this.loadingClass   = this.loadingClass    || "subscriber-loading";
-      this.onerror        = this.onerror         || noop;
-      this.onsuccess      = this.onsuccess       || noop;
-      this.oncomplete     = this.oncomplete      || noop;
-      this.vars           = this.vars            || [];
-      this.event          = this.event           || null;
-      this.action         = this.action          || "/";
-      this.carrier        = null;
+      this.topWindow           = _getTopWindow();
+      this.$                   = this.$                   || window.jQuery;
+      this.requestUrl          = this.getRequestUrl()     || window.location.href;
+      this.lists               = this.lists               || [];
+      this.submitSelector      = this.submitSelector      || ".submit";
+      this.emailSelector       = this.emailSelector       || "input[name='email']";
+      this.errorClass          = this.errorClass          || "subscriber-error";
+      this.loadingClass        = this.loadingClass        || "subscriber-loading";
+      this.onerror             = this.onerror             || _noop;
+      this.onsuccess           = this.onsuccess           || _noop;
+      this.oncomplete          = this.oncomplete          || _noop;
+      this.vars                = this.vars                || [];
+      this.event               = this.event               || null;
+      this.action              = this.action              || "/";
+      this.eventAction         = this.eventAction         || '';
+      this.eventCategory       = this.eventCategory       || '';
+      this.eventValue          = this.eventValue          || 0;
+      this.eventNonInteraction = this.eventNonInteraction || '';
+      this.trackers            = new Trackers();
+      this.carrier             = null;
+
+      this.trackers.registerTracker('GTM', this.topWindow.dataLayer);
+      _trackOpen(this);
 
       this.buildSubscriberLists();
-      this.bindNewClickEvents();
+      _bindNewClickEvents(this);
     }
 
     APLSubscriber.prototype.buildSubscriberLists = function() {
@@ -65,12 +106,13 @@
     };
 
     APLSubscriber.prototype.handleButtonClick = function(e) {
+      var email = this.$(this.emailSelector).val();
+
       this.removeErrorStatus();
       this.applyLoadingStatus();
 
-      var email = this.$(this.emailSelector).val();
-
       if(this.emailIsValid(email)) {
+        _trackSubmit(this);
         this.submit();
       } else {
         this.handleError();
@@ -137,15 +179,17 @@
       this.carrier = this.$.ajax(carrierOptions);
     };
 
-    APLSubscriber.prototype.bindNewClickEvents = function() {
-      var _APL = this;
-
-      this.$(window).on('onBeforeSubmit', function(e){
+    _bindNewClickEvents = function(_APL) {
+      _APL.$(window).on('onBeforeSubmit', function(e){
         _APL.handleButtonClick(e);
+      });
+
+      _APL.$('body').on('pr:onPicAfterClose', function(e){
+        _trackClose(_APL);
       });
     };
 
-    var getTopWindow = function() {
+    var _getTopWindow = function() {
       var topWindow = window;
       while (topWindow !== topWindow.parent) {
         topWindow = topWindow.parent;
@@ -153,26 +197,48 @@
       return topWindow;
     };
 
-    var noop = function() {};
+    var _trackOpen = function(_APL) {
+      var trackerOptions = {
+        'event':               'trackAnalyticsEvent',
+        'eventCategory':       _APL.eventCategory,
+        'eventAction':         'View',
+        'eventNonInteraction': true
+      };
+      _APL.trackers.track('GTM', trackerOptions);
+    };
+
+    var _trackSubmit = function(_APL) {
+      var trackerOptions = {
+        'event':            'trackAnalyticsEvent',
+        'eventCategory':    _APL.eventCategory,
+        'eventAction':      _APL.eventAction
+      };
+      _APL.trackers.track('GTM', trackerOptions);
+    };
+
+    var _trackClose = function(_APL) {
+      var trackerOptions = {
+        'event':            'trackAnalyticsEvent',
+        'eventCategory':    _APL.eventCategory,
+        'eventAction':      'Close'
+      };
+      _APL.trackers.track('GTM', trackerOptions);
+    };
+
+    var _noop = function() {};
 
     return APLSubscriber;
 
   })();
 
-  if (typeof module !== "undefined" && module !== null) {
-    module.exports = APLSubscriber;
-  }
-
   module.exports = APLSubscriber;
 
 }).call(this);
 
-},{}],2:[function(require,module,exports){
+},{"../adapters/trackers":1}],3:[function(require,module,exports){
 (function() {
-  if (typeof window !== "undefined" && window !== null) {
-    window.APLSubscriber = require('./factories/subscriber');
-  }
-  
+  window.APLSubscriber = require('./factories/subscriber');
+
 }).call(this);
 
-},{"./factories/subscriber":1}]},{},[1,2]);
+},{"./factories/subscriber":2}]},{},[1,2,3]);

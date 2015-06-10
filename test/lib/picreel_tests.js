@@ -38,6 +38,7 @@ QUnit.test("APL Subscriber", function(assert) {
   var formToCarrierParamsSpy = sinon.spy(subject, "formToCarrierParams");
 
   assert.strictEqual(subject.topWindow, window, "topWindow should be window");
+  assert.ok('dataLayer' in window, "GTM dataLayer should exist");
 
   assert.ok(subject.emailIsValid(validEmail), "Recognizes a valid email");
 
@@ -71,8 +72,14 @@ QUnit.test("APL Subscriber", function(assert) {
   assert.ok((subject.formToCarrierParams().event == validEventName), "If an event name exists, it is submitted");
 
   carrierSpy.reset();
+  var dataLayerStartingLength = dataLayer.length;
   $(subject.emailSelector).val(validEmail);
   $(subject.submitSelector).trigger("onBeforeSubmit");
   assert.deepEqual(subject.formToCarrierParams(), validFormData, "Reads data from the form");
   assert.ok(carrierSpy.called, "Sends AJAX carrier");
+  assert.ok(dataLayer.length > dataLayerStartingLength, "Tracks submit in GTM");
+
+  var dataLayerStartingLength = dataLayer.length;
+  $('body').trigger("pr:onPicAfterClose");
+  assert.ok(dataLayer.length > dataLayerStartingLength, "Tracks when the modal has been closed");
 });
